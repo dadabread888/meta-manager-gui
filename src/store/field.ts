@@ -29,15 +29,15 @@ export interface IBio {
     option?: null | string;
     talkTo?: null | string;
     validation?: null | string;
+    locked?: boolean;
+
 }
 
 export interface IJournal{
-    active: boolean;
     createdAt: string;
     createdBy: string;
     deletedAt: string;
     deletedBy: string;
-    locked: boolean;
     updatedAt: string;
     updatedBy: string;
 }
@@ -101,7 +101,18 @@ export const actions:any = {
 
     create:async ({ commit }: { commit: Commit}, payload: IFieldItem) => {
         try {            
-            let response = await Vue.axios.post(`${settings.routes.database}/item`, payload);
+            let response = await Vue.axios.post(`${settings.routes.database}/item`, payload, 
+            {
+                toastConfig: {
+                    showToast: true,
+                    requestToast: {
+                        title: 'Creating',
+                    },
+                    responseToast: {
+                        title: 'Created!',
+                    },
+                }
+            });
             commit('createItem', response.data);
         } catch (error:any) {
             const msg = 'Unable to create field.';
@@ -111,7 +122,8 @@ export const actions:any = {
 
     update:async ({ commit }: { commit: Commit}, payload: IFieldItem) => {
         try {
-            const id = payload.id            
+            const id = payload.id          
+              
             let response = await Vue.axios.put(`${settings.routes.database}/item/${id}`, payload, 
                 {
                     toastConfig: {
@@ -131,10 +143,23 @@ export const actions:any = {
         }
     },
         
-    delete:async ({ commit }: { commit: Commit}, fieldId: string) => {
+    delete:async ({ commit }: { commit: Commit}, payload: IFieldItem) => {
         try {
-            await Vue.axios.delete(`${settings.routes.database}/item/${fieldId}`);
-            commit('deleteItem', fieldId);
+            const id = payload.id          
+            await Vue.axios.delete(`${settings.routes.database}/item/${id}`, 
+            {
+                data: payload,
+                toastConfig: {
+                    showToast: true,
+                    requestToast: {
+                        title: 'Deleting',
+                    },
+                    responseToast: {
+                        title: 'Deleted! Deleted field has moved into glacier storage.',
+                    },
+                } 
+            });
+            commit('deleteItem', id);
         } catch (error:any) {
             const msg = 'Unable to delete field.';
             catchError(error, msg)

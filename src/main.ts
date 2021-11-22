@@ -5,7 +5,6 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
-// import axios from 'axios';
 import VueAxios from 'vue-axios';
 import axios from '@/plugins/axios';
 import Spy from './plugins/spy';

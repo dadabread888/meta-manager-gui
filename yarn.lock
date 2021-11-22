@@ -231,6 +231,11 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@fortawesome/fontawesome-free@^6.0.0-beta2":
+  version "6.0.0-beta2"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-6.0.0-beta2.tgz#d66c6e9aad085d003f2cf88244f6adce16e07f78"
+  integrity sha512-od2COSiBZ70dB5YgZuZEJ3Jy3RHFUhKKjN4dBxNVtmC8DYlyuI4q9wUSzmpLWXQVnRTADRoOLywA9E6SRaS6YQ==
+
 "@hapi/address@2.x.x":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.1.4.tgz#5d67ed43f3fd41a69d4b9ff7b56e7c0d1d0a81e5"

@@ -36,15 +36,15 @@
         ></v-switch>
         <v-spacer></v-spacer>
         <v-dialog
+          persistent
           v-model="dialog"
           max-width="500px"
         >
-          <template v-slot:activator="{ on, attrs }">
+          <template v-slot:activator="{ on }">
             <v-btn
               color="primary"
               dark
               class="mb-2"
-              v-bind="attrs"
               v-on="on"
             >
               New Item
@@ -125,13 +125,13 @@
           class="mr-2"
           @click="editItem(item)"
         >
-          mdi-pencil
+          fa-solid fa-pencil
         </v-icon>
         <v-icon
           small
           @click="deleteItem(item)"
         >
-          mdi-delete
+          fa-solid fa-trash-can
         </v-icon>
     </template>
   </v-data-table>
@@ -142,6 +142,8 @@ import { Vue, Component} from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { IFieldItem}  from '@/store/field'
 const stoField = namespace('FieldStore');
+
+const clone = (a:any) => JSON.parse(JSON.stringify(a));
 
 @Component
 export default class LiveBoss extends Vue {
@@ -154,7 +156,32 @@ export default class LiveBoss extends Vue {
   public dialog:boolean  = false;
   public dialogDelete:boolean = false;
 
-  public blankItem:any = {
+  public BLANK_ITEM:any = {
+    id: '',
+    bio:{
+        allowedValue: null,
+        dataType: null,
+        default: null,
+        display: null,
+        edit: false,
+        fieldName: null,
+        group: null,
+        option: null,
+        talkTo: null,
+        validation: null,
+        locked: false,
+    },
+    journal:{
+          createdAt: '',
+          createdBy: '',
+          updatedAt: '',
+          updatedBy: '',
+          deletedAt: '',
+          deletedBy: '',
+    } 
+  }
+  
+  public BLANK_ITEM_TEST:any = {
     id: '',
     bio:{
         allowedValue: '',
@@ -167,30 +194,28 @@ export default class LiveBoss extends Vue {
         option: '',
         talkTo: '',
         validation: '',
+        locked: false,
     },
     journal:{
-          active: true,
           createdAt: '',
           createdBy: '',
           deletedAt: '',
           deletedBy: '',
-          locked: false,
           updatedAt: '',
           updatedBy: '',
     } 
   }
-
-  public editedItem = Object.assign({}, this.blankItem); 
-  public defaultItem = Object.assign({}, this.blankItem);
+  public editedItem = clone(this.BLANK_ITEM); 
+  public defaultItem = clone(this.BLANK_ITEM); 
 
   public editedIndex:any = -1
 
   public get formTitle() {
-    return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+    return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
   }
 
-  public get saveAction () {
-    return this.editedIndex > -1 ? 'update': 'create';
+  public get saveAction () {    
+    return this.editedIndex === -1 ? 'create': 'update' ;
   }
 
   public setCellColor(fieldValue:any){    
@@ -285,32 +310,28 @@ export default class LiveBoss extends Vue {
       } else{
         await this.update(this.editedItem);
       }
-
+      this.close()
     } catch (error) {
-      
+      console.log(error);
     }
-
-    this.close()
   }
 
   public close () {
-    this.dialog = false
-    this.$nextTick(() => {
-      this.editedItem = Object.assign({}, this.defaultItem)
-      this.editedIndex = -1
-    })
+    this.dialog = false    
+    this.editedItem = clone(this.BLANK_ITEM); 
+    this.editedIndex = -1
   }
 
   public closeDelete () {
     this.dialogDelete = false
     this.$nextTick(() => {
-      this.editedItem = Object.assign({}, this.blankItem)
+      this.editedItem = clone(this.BLANK_ITEM); 
       this.editedIndex = -1
     })
   }
 
-  public  deleteItemConfirm () {
-    this.delete(this.editedItem.id);
+  public deleteItemConfirm () {
+    this.delete(this.editedItem);
     // this.items.splice(this.editedIndex, 1)
     this.closeDelete()
   }
