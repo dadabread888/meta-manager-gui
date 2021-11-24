@@ -8,12 +8,14 @@
         indeterminate
         color="deep-orange"
         class="progress-bar"
-      ></v-progress-linear>
+      />
     </v-app-bar>
     <v-main>
-      <v-container>
+      
+         <router-view />
+      <!-- <v-container>
         <LiveBoss/>
-      </v-container>
+      </v-container> -->
     </v-main>
   </v-app>
 </template>
