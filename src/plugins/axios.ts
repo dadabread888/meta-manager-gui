@@ -43,13 +43,14 @@ axios.interceptors.response.use(
     return response;
   },
   (error:any) => {
+        
         Promise.reject(error);
         let errorConfig = error.config;
 
         spyAgent.endMission(errorConfig.url);
 
         Vue.$toast.dismiss(errorConfig.toastConfig.requestToastId);        
-        Vue.$toast.error(`${error}`);
+        Vue.$toast.error(`${error.response.data.message}`);
     },
 );
 

@@ -14,7 +14,7 @@
                 x-large 
                 color="grey darken-3" 
                 elevation="7" 
-                @click="login"
+                @click="signin"
             >Login</v-btn>
         </v-layout>
 
@@ -29,7 +29,7 @@ const stoLogin = namespace('UserStore');
 
 @Component
 export default class Login extends Vue {
-    @stoLogin.Action public verifyUser!: (user:any) => Promise<null>;
+    @stoLogin.Action public login!: (user:any) => Promise<null>;
     public config = {
         num: [4, 7],
         rps: 0.5,
@@ -45,9 +45,9 @@ export default class Login extends Vue {
         random: 15
     }
 
-    public async login(){
+    public async signin(){
         const googleUser = await this.$gAuth.signIn()
-        this.verifyUser(googleUser);
+        await this.login(googleUser);
     }
 }
 </script>
