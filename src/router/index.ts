@@ -42,9 +42,7 @@ const router = new VueRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {  
-  console.log(to.name !== 'Login' , !(store.state as any).UserStore.authed);
-  
+router.beforeEach((to, from, next) => {
   if (to.name !== 'Login' && !(store.state as any).UserStore.authed) next({ name: 'Login' })
   else next()
 })

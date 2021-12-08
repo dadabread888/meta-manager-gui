@@ -19,16 +19,25 @@ import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 
 const stoUser = namespace('UserStore');
+const stoSocket = namespace('SocketStore');
 
 @Component
 export default class App extends Vue {
   @stoUser.Action public verifyToken!: () => Promise<null>;
   @stoUser.State public authed!:boolean;
+  @stoUser.State public currentUser!:any;
+  @stoSocket.Action public userChange!: (payload) => Promise<null>;
 
   @Watch('authed')
   private onAuthChange(){
     if(this.authed) {
       Object.assign(this.$route.query, { redirect: 'liveboss'});
+      let payload = { 
+        'event':'login',
+        'body': '',
+        'msg':`${this.currentUser.fullName} is logged in`
+      }
+      this.userChange(payload)
     }
     this.$router.push(this.$route.query.redirect as string);
   }

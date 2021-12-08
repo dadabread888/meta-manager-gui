@@ -6,3 +6,10 @@ declare module 'vue/types/vue' {
     $gAuth: any;
   }
 }
+
+declare module 'vue/types/vue' {
+  // 3. Declare augmentation for Vue
+  interface Vue {
+    $socket: any;
+  }
+}

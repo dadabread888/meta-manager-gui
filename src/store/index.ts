@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import { FieldStore } from "@/store/field";
 import { UserStore } from "@/store/user";
+import { SocketStore } from "@/store/socket";
 
 Vue.use(Vuex);
 
@@ -11,6 +12,7 @@ export default new Vuex.Store({
   actions: {},
   modules: {
     FieldStore,
-    UserStore
+    UserStore,
+    SocketStore,
   },
 });

@@ -14,7 +14,6 @@
         <th v-for="header in props.headers" :key="header.text" class="text-capitalize"/>
       </template>
       <!-- <template v-slot:body="{ items }"  >
-        <tbody>
           <tr
             v-for="item in items"
             :key="item.name"
@@ -24,7 +23,17 @@
             </td>
 
           </tr>
-        </tbody>
+      </template> -->
+      <!-- <template v-slot:item="{ item }">
+        <tr> 
+            <td>
+              test
+              <v-icon></v-icon>
+            </td>    
+            <td v-for="header in metadataHeader" :key="header.text">
+              {{item.bio[header.value]}}
+            </td>
+        </tr>
       </template> -->
       <template v-slot:top>
         <v-toolbar flat>
@@ -121,6 +130,13 @@
         </td>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
+        <v-icon
+            v-if="item.bio.locked"
+            small
+          >
+            fa-solid fa-user-lock
+          </v-icon>
+        <v-flex v-else>
           <v-icon
             small
             class="mr-2"
@@ -133,17 +149,20 @@
             @click="deleteItem(item)"
           >
             fa-solid fa-trash-can
-          </v-icon>
+        </v-icon>
+        </v-flex>
       </template>
+
     </v-data-table>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Vue, Component} from 'vue-property-decorator';
+import { Vue, Component, Watch} from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import { IFieldItem}  from '@/store/field'
 const stoField = namespace('FieldStore');
+const stoUser = namespace('UserStore');
+const stoSocket = namespace('SocketStore');
 
 const clone = (a:any) => JSON.parse(JSON.stringify(a));
 
@@ -154,6 +173,11 @@ export default class LiveBoss extends Vue {
   @stoField.Action public create!: (item:any) => Promise<null>;
   @stoField.Action public update!: (item:any) => Promise<null>;
   @stoField.Action public delete!: (id:string) => Promise<null>;
+  @stoUser.State public currentUser!:any;
+
+  @stoSocket.State public websocketEvents!:any;
+  @stoSocket.Action public itemLock!: (userId: string) => Promise<null>;
+  // @stoSocket.Action public itemUnLock!: (userId: string) => Promise<null>;
 
   public dialog:boolean  = false;
   public dialogDelete:boolean = false;
@@ -285,18 +309,64 @@ export default class LiveBoss extends Vue {
   }
   private async mounted(){
     await this.fetch();
+    this.onItemLocked(this.websocketEvents.itemLocked);
   }
 
   public editItem(item:any){
     this.editedIndex = this.items.indexOf(item)
     this.editedItem = Object.assign({}, item)
     this.dialog = true
+    
+    let payload:any = {
+        'event': 'itemLocked',
+        'body': {'id': item.id},
+        'msg': `${this.currentUser.fullName} is editing ${item.id}`
+    }
+    this.itemLock(payload);
   }
+
+  // @Watch('websocketEvents.itemUnLocked',{immediate:true, deep: true})
+  @Watch('websocketEvents.itemLocked',{immediate:true, deep: true})
+  private onItemLocked(value){
+    // console.log('item locked',websocketEvents.itemLocked);
+    this.$nextTick(() =>{
+      this.websocketEvents.itemLocked.forEach(id => {
+        this.items.forEach(item => {
+          if (item.id == id) {
+            item.bio.locked = true
+          }
+        })
+      })
+    })
+
+    // this.websocketEvents.itemLocked.filter(item => !this.websocketEvents.itemLocked.includes(item))  
+  }
+  
+  @Watch('websocketEvents.itemUnLocked',{immediate:true, deep: true})
+  private onItemUnLocked(value){
+    // console.log('item unlocked::::', websocketEvents.itemUnLocked);
+    this.websocketEvents.itemUnLocked.forEach(id => {
+      this.items.forEach(item => {
+        if (item.id == id) {
+          item.bio.locked = false
+        }
+      })
+      this.websocketEvents.itemUnLocked = []
+    })
+
+  }
+
 
   public deleteItem(item:any){
       this.editedIndex = this.items.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
+      let payload:any = {
+          'event': 'itemLocked',
+          'body': {'id': item.id},
+          'msg': `${this.currentUser.fullName} is editing ${item.id}`
+      }
+      this.itemLock(payload);
   }
 
   public async save(){
@@ -319,6 +389,12 @@ export default class LiveBoss extends Vue {
   }
 
   public close () {
+    let payload:any = {
+        'event': 'itemUnLocked',
+        'body': {'id': this.editedItem.id},
+        'msg': `${this.currentUser.fullName} finished editing ${this.editedItem.id}`
+    }
+    this.itemLock(payload);
     this.dialog = false    
     this.editedItem = clone(this.BLANK_ITEM); 
     this.editedIndex = -1
@@ -347,3 +423,8 @@ export default class LiveBoss extends Vue {
 
 }
 </script>
+<style scoped>
+.hide{
+  display: none;
+}
+</style>
